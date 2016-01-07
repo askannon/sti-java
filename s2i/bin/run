@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [ -z "$JAVA_AGENT" ]; then
+  export JAVA_AGENT="-javaagent:jolokia-agent.jar=host=0.0.0.0"
+fi
+
+if [ -z "$JVM_ARGS" ]; then
+  export JVM_ARGS="-Dlog4j.configuration=etc/log4j.properties"
+fi
+
 echo "Environment variables:"
 env | sort 
 echo
