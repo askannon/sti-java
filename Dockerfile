@@ -30,6 +30,8 @@ RUN yum install -y --enablerepo=centosplus \
 	mkdir -p /java/etc && \
     mkdir -p /opt/s2i/destination
 
+WORKDIR /java
+	
 # Fetch the Jolokia agent
 ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/$JOLOKIA_VERSION/jolokia-jvm-$JOLOKIA_VERSION-agent.jar /java/jolokia-agent.jar
 	

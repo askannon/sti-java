@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Environment variables:
+echo "Environment variables:"
 env | sort 
 echo
 
