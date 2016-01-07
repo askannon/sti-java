@@ -5,16 +5,16 @@ FROM openshift/base-centos7
 
 MAINTAINER Askannon <askannon@flexarc.com>
 
-EXPOSE 8778
+EXPOSE 8080 8778
 
-ENV JOLOKIA_VERSION 1.3.1
-ENV MAVEN_VERSION 3.3.3
-ENV JAVA_AGENT -javaagent:jolokia-agent.jar=host=0.0.0.0
-ENV JVM_ARGS -Dlog4j.configuration=etc/log4j.properties
+ENV JOLOKIA_VERSION=1.3.1
+ENV MAVEN_VERSION=3.3.3
+ENV JAVA_AGENT=-javaagent:jolokia-agent.jar=host=0.0.0.0
+ENV JVM_ARGS=-Dlog4j.configuration=etc/log4j.properties
 
 LABEL io.k8s.description="Platform for building and running Java 8 applications" \
       io.k8s.display-name="Java 8" \
-      io.openshift.expose-services="8778:jolokia" \
+      io.openshift.expose-services="8080/tcp:http,8778/tcp:jolokia" \
       io.openshift.tags="builder,java,java8" \
       io.openshift.s2i.destination="/opt/s2i/destination"
 
