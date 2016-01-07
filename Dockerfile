@@ -7,10 +7,10 @@ MAINTAINER Askannon <askannon@flexarc.com>
 
 EXPOSE 8778
 
+ENV JOLOKIA_VERSION 1.3.1
 ENV MAVEN_VERSION 3.3.3
 ENV JAVA_AGENT -javaagent:jolokia-agent.jar=host=0.0.0.0
 ENV JVM_ARGS -Dlog4j.configuration=etc/log4j.properties
-ENV JOLOKIA_VERSION 1.3.1
 
 LABEL io.k8s.description="Platform for building and running Java 8 applications" \
       io.k8s.display-name="Java 8" \
@@ -26,6 +26,7 @@ RUN yum install -y --enablerepo=centosplus \
     tar -zx -C /usr/local) && \
     ln -sf /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn /usr/local/bin/mvn && \
 	mkdir -p /java/lib && \
+	mkdir -p /java/etc && \
     mkdir -p /opt/s2i/destination
 
 # Fetch the Jolokia agent
@@ -34,7 +35,9 @@ ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/1.3.1/jolokia-jvm-$J
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
-RUN chmod -R g+rw /opt/s2i/destination
+RUN chown -R 1001:0 /java && \
+	chmod -R ug+rw /java && \
+	chmod -R g+rw /opt/s2i/destination
 
 USER 1001
 

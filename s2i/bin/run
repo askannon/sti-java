@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo Environment variables:
+env | sort 
+echo
+
+if [ -z "$JAVA_JAR" ]; then
+  echo "executing java $JAVA_AGENT $JVM_ARGS -cp "classes:lib/*" $JAVA_MAIN $JAVA_MAIN_ARGS"
+  exec java $JAVA_AGENT $JVM_ARGS -cp "classes:lib/*" $JAVA_MAIN $JAVA_MAIN_ARGS
+else
+  echo "executing java $JAVA_AGENT $JVM_ARGS -jar $JAVA_JAR $JAVA_MAIN_ARGS"
+  exec java $JAVA_AGENT $JVM_ARGS -jar $JAVA_JAR $JAVA_MAIN_ARGS
+fi
