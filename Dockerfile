@@ -9,6 +9,7 @@ EXPOSE 8080 8778
 
 ENV JOLOKIA_VERSION=1.3.1
 ENV MAVEN_VERSION=3.3.3
+ENV JAVA_HOME=/usr/lib/jvm/java
 ENV JAVA_AGENT=-javaagent:jolokia-agent.jar=host=0.0.0.0
 ENV JVM_ARGS=-Dlog4j.configuration=etc/log4j.properties
 
