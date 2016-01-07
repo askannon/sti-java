@@ -35,9 +35,13 @@ ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/$JOLOKIA_VERSION/jol
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
+# Copy files config file
+COPY ./etc /java/etc
+
 RUN chown -R 1001:0 /java && \
 	chmod -R ug+rw /java && \
-	chmod -R g+rw /opt/s2i/destination
+	chmod -R g+rw /opt/s2i/destination && \
+	chmod -R +x $STI_SCRIPTS_PATH/*
 
 USER 1001
 
