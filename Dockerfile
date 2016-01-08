@@ -1,46 +1,60 @@
-# This image provides a base for building and running Java applications.
-# It builds using maven and runs the resulting artifacts
-
-FROM openshift/base-centos7
+FROM alpine:3.3
 
 MAINTAINER Askannon <askannon@flexarc.com>
 
-EXPOSE 8080 8778
+EXPOSE 8778
 
-ENV JOLOKIA_VERSION 1.3.1
-ENV MAVEN_VERSION 3.3.3
-ENV JAVA_HOME /usr/lib/jvm/java
+ENV STI_SCRIPTS_PATH=/usr/libexec/s2i
+ENV JOLOKIA_VERSION=1.3.1
+ENV MAVEN_VERSION=3.3.3
+ENV JAVA_HOME=/usr/lib/jvm/java
+ENV JAVA_APP_DIR=/opt/app
+ENV HOME=/opt/s2i/destination
+ENV PATH=/opt/s2i/destination/bin:/opt/app/bin:$PATH
 
 LABEL io.k8s.description="Platform for building and running Java 8 applications" \
       io.k8s.display-name="Java 8" \
-      io.openshift.expose-services="8080/tcp:http,8778/tcp:jolokia" \
+      io.openshift.expose-services="8778/tcp:jolokia" \
       io.openshift.tags="builder,java,java8" \
-      io.openshift.s2i.destination="/opt/s2i/destination"
+      io.openshift.s2i.destination="/opt/s2i/destination" \
+	  io.openshift.s2i.scripts-url=image:///usr/libexec/s2i
+
+RUN useradd -u 1001 -r -g 0 -d ${HOME} -s /sbin/nologin \
+      -c "Default Application User" default && \
+  chown -R 1001:0 /opt/app-root	  
+
+RUN mkdir -p $HOME && \
+	mkdir -p $JAVA_APP_DIR && \
+	mkdir -p $STI_SCRIPTS_PATH && \
+	mkdir -p /opt/jolokia
+	  
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+ && apk add --update \
+	bash \
+    curl \
+    openjdk8 \
+	ngrep \
+	tcpdump \
+	lsof \
+	tar \
+	which \
+	bc \
+	unzip
+ && rm /var/cache/apk/*
 
 # Install Maven
-RUN yum install -y --enablerepo=centosplus \
-    tar unzip bc which lsof java-1.8.0-openjdk java-1.8.0-openjdk-devel && \
-    yum clean all -y && \
-    (curl -0 http://www.us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | \
+RUN (curl -0 http://www.us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | \
     tar -zx -C /usr/local) && \
-    ln -sf /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn /usr/local/bin/mvn && \
-	mkdir -p /java/lib && \
-	mkdir -p /java/etc && \
-    mkdir -p /opt/s2i/destination
-
-WORKDIR /java
-	
+    ln -sf /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn /usr/local/bin/mvn
+ 
 # Fetch the Jolokia agent
-ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/$JOLOKIA_VERSION/jolokia-jvm-$JOLOKIA_VERSION-agent.jar /java/jolokia-agent.jar
+ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/$JOLOKIA_VERSION/jolokia-jvm-$JOLOKIA_VERSION-agent.jar /opt/jolokia/jolokia-agent.jar
 	
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
-# Copy files config file
-COPY ./etc /java/etc
-
-RUN chown -R 1001:0 /java && \
-	chmod -R ug+rw /java && \
+RUN chown -R 1001:0 $JAVA_APP_DIR && \
+	chmod -R ug+rw $JAVA_APP_DIR && \
 	chmod -R g+rw /opt/s2i/destination && \
 	chmod -R +x $STI_SCRIPTS_PATH/*
 
