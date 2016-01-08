@@ -3,7 +3,7 @@ FROM alpine:3.3
 MAINTAINER Askannon <askannon@flexarc.com>
 
 ENV STI_SCRIPTS_PATH="/usr/local/s2i" \
-	JOLOKIA_VERSION="1.3.1" \
+	JOLOKIA_VERSION="1.3.2" \
 	MAVEN_VERSION="3.3.3" \
 	JAVA_HOME="/usr/lib/jvm/default-jvm" \
 	HAWTAPP_VERSION="2.2.53" \
