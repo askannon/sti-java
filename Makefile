@@ -1,4 +1,4 @@
-IMAGE_NAME = sti-java
+IMAGE_NAME = sti-java-80-alpine3
 
 build:
         docker build -t $(IMAGE_NAME) .
