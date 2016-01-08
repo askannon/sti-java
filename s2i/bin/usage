@@ -1,2 +1,2 @@
 #!/bin/sh
-cat $(dirname $0)/usage.txt
+cat ${S2I_SOURCE_DIR}/usage.txt
