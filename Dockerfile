@@ -2,37 +2,29 @@ FROM alpine:3.3
 
 MAINTAINER Askannon <askannon@flexarc.com>
 
-EXPOSE 8778
+ENV STI_SCRIPTS_PATH="/usr/local/s2i" \
+	JOLOKIA_VERSION="1.3.1" \
+	MAVEN_VERSION="3.3.3" \
+	JAVA_HOME="/usr/lib/jvm/default-jvm" \
+	HAWTAPP_VERSION="2.2.53" \
+	PATH=$PATH:"/usr/local/s2i" \
+	AB_JOLOKIA_CONFIG="/opt/jolokia/jolokia.properties" \
+	AB_JOLOKIA_AUTH_OPENSHIFT="true" \
+	HOME="/deployments"
 
-ENV STI_SCRIPTS_PATH=/usr/libexec/s2i
-ENV JOLOKIA_VERSION=1.3.1
-ENV MAVEN_VERSION=3.3.3
-ENV JAVA_HOME=/usr/lib/jvm/default-jvm
-ENV JAVA_APP_DIR=/opt/app
-ENV HOME=/opt/s2i/destination
-ENV PATH=/opt/s2i/destination/bin:/opt/app/bin:$PATH
-
-LABEL io.k8s.description="Platform for building and running Java 8 applications" \
+LABEL io.k8s.description="Platform for building and running plain Java 8 applications (flat classpath only)" \
       io.k8s.display-name="Java 8" \
       io.openshift.expose-services="8778/tcp:jolokia" \
       io.openshift.tags="builder,java,java8" \
-      io.openshift.s2i.destination="/opt/s2i/destination" \
-          io.openshift.s2i.scripts-url=image:///usr/libexec/s2i
-
-RUN mkdir -p ${HOME} && adduser -D -u 1001 -h ${HOME} -s /sbin/nologin \
-      -g "Default Application User" default && \
-  chown -R 1001:1001 ${HOME}
-
-RUN mkdir -p $JAVA_APP_DIR && \
-        mkdir -p $STI_SCRIPTS_PATH && \
-        mkdir -p /opt/jolokia
+      io.openshift.s2i.destination="/tmp" \
+	  io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && apk add --update \
         bash \
-  curl \
-  openjdk8 \
-  ngrep \
+		curl \
+		openjdk8 \
+		ngrep \
         tcpdump \
         lsof \
         tar \
@@ -52,16 +44,27 @@ RUN (curl -0 http://www.us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries
     tar -zx -C /usr/local) && \
     ln -sf /usr/local/apache-maven-$MAVEN_VERSION/bin/mvn /usr/local/bin/mvn
 
-# Fetch the Jolokia agent
-ADD http://central.maven.org/maven2/org/jolokia/jolokia-jvm/$JOLOKIA_VERSION/jolokia-jvm-$JOLOKIA_VERSION-agent.jar /opt/jolokia/jolokia-agent.jar
+# Jolokia agent
+ADD jolokia-opts /opt/jolokia/
+ADD jolokia.properties /opt/jolokia/
+ADD "http://repo1.maven.org/maven2/org/jolokia/jolokia-jvm/${JOLOKIA_VERSION}/jolokia-jvm-${JOLOKIA_VERSION}-agent.jar /opt/jolokia/jolokia.jar"
+RUN chmod 444 /opt/jolokia/jolokia.jar \
+ && chmod 755 /opt/jolokia/jolokia-opts
+EXPOSE 8778
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
+ADD README.md $STI_SCRIPTS_PATH/usage.txt
 
-RUN chown -R 1001:1001 $JAVA_APP_DIR && \
-        chmod -R ug+rw $JAVA_APP_DIR && \
-        chmod -R +x $STI_SCRIPTS_PATH/*
+# Necessary to permit running with a randomised UID
+RUN mkdir $HOME \
+ && chmod -R "a+rwX" $HOME
 
+RUN adduser -D -u 1001 -h ${HOME} -s /sbin/nologin \
+      -g "Default Application User" default && \
+  chown -R 1001:1001 ${HOME}
+
+# S2I requires a numeric, non-0 UID
 USER 1001
 
 CMD $STI_SCRIPTS_PATH/usage

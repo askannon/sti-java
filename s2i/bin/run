@@ -1,23 +1,13 @@
 #!/bin/bash
 
-if [ -z "$JAVA_AGENT" ]; then
-  export JAVA_AGENT="-javaagent:/opt/jolokia/jolokia-agent.jar=host=0.0.0.0"
-fi
+# Global S2I variable setup
+source `dirname "$0"`/s2i-setup
 
-if [ -z "$JVM_ARGS" ]; then
-  export JVM_ARGS="-Dlog4j.configuration=etc/log4j.properties"
-fi
+echo "Executing ${DEPLOYMENTS_DIR}/bin/run ..."
 
-cd $JAVA_APP_DIR
-
-echo "Environment variables:"
-env | sort
-echo
-
-if [ -z "$JAVA_JAR" ]; then
-  echo "executing java $JAVA_AGENT $JVM_ARGS -cp "classes:lib/*" $JAVA_MAIN $JAVA_MAIN_ARGS"
-  exec java $JAVA_AGENT $JVM_ARGS -cp "classes:lib/*" $JAVA_MAIN $JAVA_MAIN_ARGS
-else
-  echo "executing java $JAVA_AGENT $JVM_ARGS -jar $JAVA_JAR $JAVA_MAIN_ARGS"
-  exec java $JAVA_AGENT $JVM_ARGS -jar $JAVA_JAR $JAVA_MAIN_ARGS
-fi
+# Always include jolokia-opts, which can be empty if switched off via env
+JAVA_OPTIONS="${JAVA_OPTIONS:+${JAVA_OPTIONS} }$(/opt/jolokia/jolokia-opts)"
+# Temporary options variable until the harmonization hawt-app PR #5 has been applied (hopefully)
+JVM_ARGS="${JVM_ARGS:+${JVM_ARGS} }${JAVA_OPTIONS}"
+export JAVA_OPTIONS JVM_ARGS
+exec ${DEPLOYMENTS_DIR}/bin/run.sh
