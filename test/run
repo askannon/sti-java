@@ -72,7 +72,9 @@ cleanup() {
   echo "Cleaning image ${IMAGE_NAME}..."
   if [ -f $cid_file ]; then
     if container_exists; then
+	  echo "Stopping container using image ${IMAGE_NAME}..."
       docker stop $(cat $cid_file)
+	  sleep 2
     fi
   fi
   if image_exists ${IMAGE_NAME}-testapp; then
