@@ -3,11 +3,21 @@
 # Global S2I variable setup
 source ${STI_SCRIPTS_PATH}/s2i-setup
 
-echo "Executing ${DEPLOYMENTS_DIR}/bin/run ..."
-
 # Always include jolokia-opts, which can be empty if switched off via env
 JAVA_OPTIONS="${JAVA_OPTIONS:+${JAVA_OPTIONS} }$(/opt/jolokia/jolokia-opts)"
 # Temporary options variable until the harmonization hawt-app PR #5 has been applied (hopefully)
 JVM_ARGS="${JVM_ARGS:+${JVM_ARGS} }${JAVA_OPTIONS}"
 export JAVA_OPTIONS JVM_ARGS
-exec ${DEPLOYMENTS_DIR}/bin/run.sh
+
+echo "Environment:"
+env | sort
+echo "------------"
+
+if [ x"${JAVA_JAR_FILE}" = x ]; then
+	echo "Executing ${DEPLOYMENTS_DIR}/bin/run ..."
+	exec ${DEPLOYMENTS_DIR}/bin/run.sh
+else
+	cd ${DEPLOYMENTS_DIR}
+	echo "Executing java -jar ${DEPLOYMENTS_DIR}/app.jar"
+	exec java ${JVM_ARGS} -jar ${DEPLOYMENTS_DIR}/app.jar ${JAVA_OPTIONS}
+fi

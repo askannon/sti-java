@@ -1,14 +1,19 @@
 # S2I Java builder image
 
 This is a S2I builder image for Java builds whose result can be run directly without any further application server.
-It's suited ideally for microservices with a flat classpath (but not for "far jars")  
+It's suited ideally for microservices with a flat classpath or fat jars. 
 
 This image also provides an easy integration with an [Jolokia](https://github.com/rhuss/jolokia)  agent. See below  
 how to configure this.
 
 The following environment variables can be used to influence the behaviour of this builder image:
 
+## Artifact type
+* **JAVA_JAR_FILE** If your final artifact is a fat jar you can specify the filename in this environment variable. Setting this varaible effectively disable some of the more advanced dependency resolver and classpath build mechanisms and will just run "java -jar <JAVA_JAR_FILE>".
+
 ## Build Time
+
+The builder will automatically enable a maven profile "openshift". Other args can be changed with the following variables:
 
 * **MAVEN_ARGS** Arguments to use when calling maven, replacing the default `package hawt-app:build -DskipTests -e`. Please be sure to run the `hawt-app:build` goal (when not already bound to the `package` execution phase), otherwise the startup scripts won't work.
 * **MAVEN_ARGS_APPEND** Additional Maven  arguments, useful for temporary adding arguments like `-X` or `-am -pl ..`
