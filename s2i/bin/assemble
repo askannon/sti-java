@@ -94,7 +94,7 @@ function build_maven() {
 
   # ======================
   # After-build validation
-  if [ ! -d "${build_dir}/hawt-app" ] && [ x"${JAVA_MAIN_CLASS}" = x ] || [ x"${JAVA_JAR_FILE}" = x ]; then
+  if [ ! -d "${build_dir}/hawt-app" ] && { [ x"${JAVA_MAIN_CLASS}" = x ] || [ x"${JAVA_JAR_FILE}" = x ]; } then
     echo "No JAVA_MAIN_CLASS or JAVA_JAR_FILE specified and no hawt-app-maven-plugin configured in the pom.xml"
     exit 1
   fi
