@@ -126,10 +126,14 @@ test_connection() {
     if [ $status -eq 0 ]; then
       if [ $response_code -eq 200 ]; then
         result=0
+        break
+	  elif [ $response_code -eq 404 ]; then
+	    #Jolokia may still be starting up... wait 2 seconds
+		sleep 2
 	  else
 	    echo "Jolokia returned HTTP code ${response_code}"
+        break
       fi
-      break
     fi
     attempt=$(( $attempt + 1 ))
     sleep $sleep_time
