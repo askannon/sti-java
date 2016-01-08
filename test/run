@@ -121,7 +121,7 @@ test_connection() {
       echo "you should run the curl command in a container, for example using:"
       echo "docker run --rm -it sequenceiq/alpine-curl curl -s -w %{http_code} -o /dev/null http://$(container_ip):${test_port}/"
     fi
-    response_code=$(curl -m ${timeout} --connect-timeout ${timeout} -s -w %{http_code} -o /dev/null http://$(container_ip):${test_port}/)
+    response_code=$(curl -m ${timeout} --connect-timeout ${timeout} -s -w %{http_code} -o /dev/null http://$(container_ip):${test_port}/jolokia)
     status=$?
     if [ $status -eq 0 ]; then
       if [ $response_code -eq 200 ]; then
