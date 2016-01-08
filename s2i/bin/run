@@ -8,6 +8,7 @@ JAVA_OPTIONS="${JAVA_OPTIONS:+${JAVA_OPTIONS} }$(/opt/jolokia/jolokia-opts)"
 # Temporary options variable until the harmonization hawt-app PR #5 has been applied (hopefully)
 JVM_ARGS="${JVM_ARGS:+${JVM_ARGS} }${JAVA_OPTIONS}"
 export JAVA_OPTIONS JVM_ARGS
+cd ${DEPLOYMENTS_DIR}
 
 echo "Environment:"
 env | sort
@@ -17,7 +18,6 @@ if [ x"${JAVA_JAR_FILE}" = x ]; then
 	echo "Executing ${DEPLOYMENTS_DIR}/bin/run ..."
 	exec ${DEPLOYMENTS_DIR}/bin/run.sh
 else
-	cd ${DEPLOYMENTS_DIR}
 	echo "Executing java -jar ${DEPLOYMENTS_DIR}/app.jar"
-	exec java ${JVM_ARGS} -jar ${DEPLOYMENTS_DIR}/app.jar ${JAVA_OPTIONS}
+	exec java ${JAVA_OPTIONS} -jar ${DEPLOYMENTS_DIR}/app.jar ${JAVA_MAIN_ARGS}
 fi
