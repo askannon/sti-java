@@ -25,8 +25,9 @@ scripts_url="file://${image_dir}/s2i/bin"
 cid_file=$($MKTEMP_EXEC -u --suffix=.cid)
 
 # Since we built the candidate image locally, we don't want S2I to attempt to pull
-# it from Docker hub
-s2i_args="--force-pull=false -s ${scripts_url} --loglevel=2"
+# it from Docker hub. "s2i usage" v1.0.4 doesn't support "-s" flag
+s2i_args_usage="--force-pull=false --loglevel=2"
+s2i_args="${s2i_args_usage} -s ${scripts_url}"
 
 # Port the image exposes service to be tested
 test_port=8778
@@ -103,7 +104,7 @@ wait_for_cid() {
 
 test_usage() {
   echo "Testing 's2i usage' for ${IMAGE_NAME}..."
-  s2i usage ${s2i_args} ${IMAGE_NAME} &>/dev/null
+  s2i usage ${s2i_args_usage} ${IMAGE_NAME} &>/dev/null
 }
 
 test_connection() {
