@@ -13,23 +13,23 @@ ENV STI_SCRIPTS_PATH="/usr/local/s2i" \
 	HOME="/deployments"
 
 LABEL io.k8s.description="Platform for building and running plain Java 8 applications (flat classpath only)" \
-      io.k8s.display-name="Java 8" \
-      io.openshift.expose-services="8778/tcp:jolokia" \
-      io.openshift.tags="builder,java,java8" \
-      io.openshift.s2i.destination="/tmp" \
-	  io.openshift.s2i.scripts-url="image:///usr/local/s2i"
+		io.k8s.display-name="Java 8" \
+		io.openshift.expose-services="8778/tcp:jolokia" \
+		io.openshift.tags="builder,java,java8" \
+		io.openshift.s2i.destination="/tmp" \
+		io.openshift.s2i.scripts-url="image:///usr/local/s2i"
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
  && apk add --update \
-        bash \
+		bash \
 		curl \
 		openjdk8 \
 		ngrep \
-        tcpdump \
-        lsof \
-        tar \
-        bc \
-        unzip \
+		tcpdump \
+		lsof \
+		tar \
+		bc \
+		unzip \
 		ca-certificates && \
  rm /var/cache/apk/*
 
@@ -60,9 +60,8 @@ ADD README.md $STI_SCRIPTS_PATH/usage.txt
 RUN mkdir $HOME \
  && chmod -R "a+rwX" $HOME
 
-RUN adduser -D -u 1001 -h ${HOME} -s /sbin/nologin \
-      -g "Default Application User" default && \
-  chown -R 1001:1001 ${HOME}
+# Add a user to run our stuff
+RUN adduser -D -u 1001 -h ${HOME} -s /sbin/nologin -g "Default Application User" default
 
 # S2I requires a numeric, non-0 UID
 USER 1001
