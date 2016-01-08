@@ -37,9 +37,16 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
         lsof \
         tar \
         bc \
-        unzip && \
+        unzip \
+		ca-certificates && \
  rm /var/cache/apk/*
 
+# Update keystore since apline doesn't causing SSL issues
+RUN find /usr/share/ca-certificates/mozilla/ -name "*.crt" -exec keytool -import -trustcacerts \
+	-keystore ${JAVA_HOME}/jre/lib/security/cacerts -storepass changeit -noprompt \
+	-file {} -alias {} \; && \
+	keytool -list -keystore ${JAVA_HOME}/jre/lib/security/cacerts --storepass changeit
+ 
 # Install Maven
 RUN (curl -0 http://www.us.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | \
     tar -zx -C /usr/local) && \
