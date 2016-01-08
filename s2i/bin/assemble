@@ -16,13 +16,13 @@ function restore_saved_artifacts() {
 LOCAL_SOURCE_DIR=${HOME}
 mkdir -p $LOCAL_SOURCE_DIR
 
-# Resulting files will be deployed to /java
-DEPLOY_DIR=/java
+# Resulting files will be deployed to ${JAVA_APP_DIR}
+DEPLOY_DIR=${JAVA_APP_DIR}
 mkdir -p $DEPLOY_DIR
 
 # Copy the source for compilation
 cp -Rf /opt/s2i/destination/src/. $LOCAL_SOURCE_DIR
-chgrp -R 0 $LOCAL_SOURCE_DIR
+chgrp -R 1001 $LOCAL_SOURCE_DIR
 chmod -R g+rw $LOCAL_SOURCE_DIR
 
 # If a pom.xml is present, this is a normal build scenario
@@ -59,27 +59,27 @@ fi
 
 if [ -d $LOCAL_SOURCE_DIR/target ]; then
   cp $LOCAL_SOURCE_DIR/target/*.jar $DEPLOY_DIR >& /dev/null
-  chgrp -R 0 $DEPLOY_DIR
+  chgrp -R 1001 $DEPLOY_DIR
   chmod -R g+rw $DEPLOY_DIR
 fi
 
 if [ -d $LOCAL_SOURCE_DIR/deployments ]; then
   cp $LOCAL_SOURCE_DIR/deployments/*.jar $DEPLOY_DIR >& /dev/null
-  chgrp -R 0 $DEPLOY_DIR
+  chgrp -R 1001 $DEPLOY_DIR
   chmod -R g+rw $DEPLOY_DIR
 fi
 
 if [ -d $LOCAL_SOURCE_DIR/etc ]; then
   echo "Copying etc files from project..."
   cp $LOCAL_SOURCE_DIR/etc/*.jar $DEPLOY_DIR/etc >& /dev/null
-  chgrp -R 0 $DEPLOY_DIR/etc
+  chgrp -R 1001 $DEPLOY_DIR/etc
   chmod -R g+rw $DEPLOY_DIR/etc
 fi
 
 if [ -d $LOCAL_SOURCE_DIR/lib ]; then
   echo "Copying lib files from project..."
   cp $LOCAL_SOURCE_DIR/lib/*.jar $DEPLOY_DIR/lib >& /dev/null
-  chgrp -R 0 $DEPLOY_DIR/lib
+  chgrp -R 1001 $DEPLOY_DIR/lib
   chmod -R g+rw $DEPLOY_DIR/lib
 fi
 
