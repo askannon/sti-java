@@ -1,2 +1,2 @@
 #!/bin/sh
-cat ${S2I_SOURCE_DIR}/usage.txt
+cat ${STI_SCRIPTS_PATH}/usage.txt
